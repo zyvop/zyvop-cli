@@ -4,7 +4,7 @@
   "description": "Official CLI for ZyVOP - Write once in Markdown and cross-post to Dev.to, Hashnode, Medium & Bluesky.",
   "type": "module",
   "bin": {
-    "zyvop": "./bin/zyvop.js"
+    "zyvop": "bin/zyvop.js"
   },
   "main": "./bin/zyvop.js",
   "files": [
