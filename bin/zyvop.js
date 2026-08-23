@@ -15,7 +15,7 @@ program
     pc.bold(pc.cyan("ZyVOP CLI")) +
       " — Write once in Markdown and cross-post to dev.to, Hashnode, Medium & Bluesky.",
   )
-  .version("1.0.6", "-v, --version", "Output the current version of ZyVOP CLI");
+  .version("1.0.7", "-v, --version", "Output the current version of ZyVOP CLI");
 
 // 1. login
 program
