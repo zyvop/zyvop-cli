@@ -1,0 +1,53 @@
+{
+  "name": "zyvop",
+  "version": "1.0.6",
+  "description": "Official CLI for ZyVOP - Write once in Markdown and cross-post to Dev.to, Hashnode, Medium & Bluesky.",
+  "type": "module",
+  "bin": {
+    "zyvop": "./bin/zyvop.js"
+  },
+  "main": "./bin/zyvop.js",
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "sample-post.md"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node ./bin/zyvop.js",
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zyvop27-cmyk/zyvop-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zyvop27-cmyk/zyvop-cli/issues"
+  },
+  "homepage": "https://zyvop.com",
+  "keywords": [
+    "zyvop",
+    "cli",
+    "blogging",
+    "markdown",
+    "cross-post",
+    "devto",
+    "hashnode",
+    "medium",
+    "bluesky",
+    "syndication",
+    "github-actions"
+  ],
+  "author": "ZyVOP Team <hello@zyvop.com>",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "gray-matter": "^4.0.3",
+    "marked": "^18.0.10",
+    "ora": "^8.1.0",
+    "picocolors": "^1.1.1"
+  }
+}
