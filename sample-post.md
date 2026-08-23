@@ -8,13 +8,17 @@ category: backend
 canonical_url: https://myblog.com/zyvop-cli-suite
 meta_title: Master ZyVOP CLI Publishing & Syndication
 meta_description: Learn how to publish Markdown articles with full metadata using the official ZyVOP CLI.
+og_title: Master ZyVOP CLI Publishing & Syndication
+og_description: Learn how to publish Markdown articles with full metadata using the official ZyVOP CLI.
 generate_toc: true
 comments_enabled: true
+status: PUBLISHED
 cross_post:
   devto: false
   hashnode: false
   medium: false
   bluesky: false
+  wordpress: false
 ---
 
 # Complete Metadata Showcase 🚀
@@ -25,9 +29,11 @@ This article demonstrates every metadata feature supported by ZyVOP:
 
 - **Cover Image:** Displayed at the top of the article and social shares.
 - **Subtitle & Excerpt:** Used for article summaries and Google search snippets.
+- **SEO & Open Graph:** Custom search engine titles/descriptions and social share card overrides.
 - **Tags & Category:** Automatically categorizes your article into backend/frontend tag feeds.
 - **Canonical URL:** Protects your domain authority on search engines.
 - **Table of Contents:** Auto-generated from headings.
+- **Syndication Targets:** Cross-posts simultaneously to Dev.to, Hashnode, Medium, Bluesky, and WordPress.
 
 ## 2. Sample Code Block
 
@@ -42,6 +48,7 @@ interface ArticleConfig {
     hashnode: boolean;
     medium: boolean;
     bluesky: boolean;
+    wordpress: boolean;
   };
 }
 
@@ -53,6 +60,7 @@ const config: ArticleConfig = {
     hashnode: true,
     medium: false,
     bluesky: true,
+    wordpress: false,
   },
 };
 
