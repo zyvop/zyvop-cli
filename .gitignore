@@ -10,3 +10,4 @@ npm-debug.log*
 .env
 .env.*
 !.env.example
+.npmrc

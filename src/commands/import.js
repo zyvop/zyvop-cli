@@ -14,7 +14,7 @@ export async function importCommand(source, identifier, options) {
   }
 
   const validSources = ["devto", "hashnode", "rss", "medium"];
-  const normalizedSource = source.toLowerCase().replace(".", "");
+  const normalizedSource = source.toLowerCase().replace(/[-._]/g, "");
 
   if (!validSources.includes(normalizedSource)) {
     console.log(pc.red(`\nError: Invalid source '${source}'.`));
