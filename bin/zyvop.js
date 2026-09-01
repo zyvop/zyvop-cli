@@ -15,7 +15,7 @@ program
     pc.bold(pc.cyan("ZyVOP CLI")) +
       " — Write once in Markdown and cross-post to dev.to, Hashnode, Medium & Bluesky.",
   )
-  .version("1.0.7", "-v, --version", "Output the current version of ZyVOP CLI");
+  .version("1.0.8", "-v, --version", "Output the current version of ZyVOP CLI");
 
 // 1. login
 program
@@ -60,6 +60,8 @@ program
   .option("--series <seriesId>", "Series ID to attach this article to")
   .option("--cover <url>", "Cover image URL")
   .option("--canonical <url>", "Custom canonical URL")
+  .option("--base-url <url>", "Base URL for resolving relative images and asset links")
+  .option("-d, --dry-run", "Preview resolved metadata and syndication targets without publishing")
   .option("--toc", "Enable generated Table of Contents")
   .option("--draft", "Publish as a Draft instead of public")
   .option("--devto", "Force enable cross-posting to dev.to")

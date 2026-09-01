@@ -58,7 +58,10 @@ export async function publishArticleRestApi(rawMarkdown, token, endpoint = 'http
   if (!res.ok) {
     throw new Error(data.message || `HTTP ${res.status}: ${res.statusText}`);
   }
-  return data.data;
+  return {
+    ...(data.data || {}),
+    action: data.action || 'published',
+  };
 }
 
 export async function loginApi(email, password, endpoint) {

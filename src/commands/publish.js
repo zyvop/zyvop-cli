@@ -52,17 +52,41 @@ export async function publishCommand(filePath, options) {
     frontmatter.description ||
     undefined;
   const excerpt = options.excerpt || frontmatter.excerpt || undefined;
-  const coverImage =
-    options.cover ||
-    frontmatter.cover_image ||
-    frontmatter.coverImage ||
-    frontmatter.image ||
-    undefined;
   const canonicalUrl =
     options.canonical ||
     frontmatter.canonical_url ||
     frontmatter.canonicalUrl ||
     undefined;
+
+  let baseUrl =
+    options.baseUrl ||
+    frontmatter.base_url ||
+    frontmatter.baseUrl ||
+    undefined;
+
+  if (!baseUrl && canonicalUrl) {
+    try {
+      baseUrl = new URL(canonicalUrl).origin;
+    } catch {}
+  }
+
+  let coverImage =
+    options.cover ||
+    frontmatter.cover_image ||
+    frontmatter.coverImage ||
+    frontmatter.image ||
+    undefined;
+
+  if (typeof coverImage === "string") {
+    coverImage = coverImage.trim();
+    if (coverImage && !coverImage.startsWith("http://") && !coverImage.startsWith("https://")) {
+      if (baseUrl) {
+        const cleanBase = baseUrl.replace(/\/+$/, "");
+        const cleanPath = coverImage.startsWith("/") ? coverImage : `/${coverImage}`;
+        coverImage = `${cleanBase}${cleanPath}`;
+      }
+    }
+  }
 
   // Tags resolution
   let tagNames = [];
@@ -112,32 +136,6 @@ export async function publishCommand(filePath, options) {
     frontmatter.crossPostToWordpress ??
     false;
 
-  console.log(pc.bold(pc.cyan(`\n📦 Preparing to publish: "${title}"`)));
-  console.log(pc.dim(`File: ${resolvedPath}`));
-  if (tagNames.length > 0) console.log(pc.dim(`Tags: ${tagNames.join(", ")}`));
-  console.log(pc.dim(`Status: ${status}`));
-
-  const syndicationTargets = [];
-  if (crossPostToDevTo) syndicationTargets.push("dev.to");
-  if (crossPostToHashnode) syndicationTargets.push("Hashnode");
-  if (crossPostToMedium) syndicationTargets.push("Medium");
-  if (crossPostToBluesky) syndicationTargets.push("Bluesky");
-  if (crossPostToWordpress) syndicationTargets.push("WordPress");
-
-  if (syndicationTargets.length > 0) {
-    console.log(pc.dim(`Syndication: ${syndicationTargets.join(", ")}`));
-  } else {
-    console.log(pc.dim("Syndication: ZyVOP only"));
-  }
-  console.log();
-
-  const spinner = ora(
-    "Broadcasting article to ZyVOP and connected targets...",
-  ).start();
-
-  // Convert raw Markdown content to semantic HTML for ZyVOP's reader & editor
-  const htmlContent = marked.parse(content);
-
   // Additional frontmatter and options
   const categorySlug =
     options.category ||
@@ -175,18 +173,93 @@ export async function publishCommand(filePath, options) {
     frontmatter.commentsEnabled ??
     true;
 
+  // Dry-run mode
+  if (options.dryRun) {
+    console.log(pc.bold(pc.yellow(`\n🔍 [DRY RUN] Previewing publish payload for: "${title}"`)));
+    console.log(pc.dim("No network requests will be sent and no data will be modified."));
+    console.log(pc.bold("────────────────────────────────────────────────────────────"));
+    console.log(`  📄 ${pc.bold("File:")}            ${pc.cyan(resolvedPath)}`);
+    console.log(`  🏷️  ${pc.bold("Title:")}           ${title}`);
+    if (subtitle) console.log(`  📝 ${pc.bold("Subtitle:")}        ${subtitle}`);
+    if (excerpt) console.log(`  📜 ${pc.bold("Excerpt:")}         ${excerpt}`);
+    console.log(`  🚦 ${pc.bold("Status:")}          ${status}`);
+    if (canonicalUrl) console.log(`  🔗 ${pc.bold("Canonical URL:")}   ${pc.dim(canonicalUrl)}`);
+    if (coverImage) console.log(`  🖼️  ${pc.bold("Cover Image:")}     ${pc.dim(coverImage)}`);
+    if (tagNames.length > 0) console.log(`  🏷️  ${pc.bold("Tags:")}            ${tagNames.join(", ")}`);
+    if (categorySlug) console.log(`  📁 ${pc.bold("Category:")}        ${categorySlug}`);
+    if (seriesId) console.log(`  📚 ${pc.bold("Series ID:")}       ${seriesId}`);
+    console.log(pc.bold("────────────────────────────────────────────────────────────"));
+    console.log(pc.bold("  📡 Syndication Targets:"));
+    const targets = [
+      { name: "ZyVOP (Primary)", enabled: true },
+      { name: "dev.to", enabled: crossPostToDevTo },
+      { name: "Hashnode", enabled: crossPostToHashnode },
+      { name: "Medium", enabled: crossPostToMedium },
+      { name: "Bluesky", enabled: crossPostToBluesky },
+      { name: "WordPress", enabled: crossPostToWordpress },
+    ];
+    targets.forEach((t) => {
+      const state = t.enabled ? pc.green("✓ Enabled") : pc.dim("✗ Skipped");
+      console.log(`     ${t.name.padEnd(20)} ${state}`);
+    });
+    console.log(pc.bold("────────────────────────────────────────────────────────────\n"));
+    console.log(pc.green("✨ Dry run completed successfully. Everything looks ready to publish!\n"));
+    return;
+  }
+
+  console.log(pc.bold(pc.cyan(`\n📦 Preparing to publish: "${title}"`)));
+  console.log(pc.dim(`File: ${resolvedPath}`));
+  if (tagNames.length > 0) console.log(pc.dim(`Tags: ${tagNames.join(", ")}`));
+  console.log(pc.dim(`Status: ${status}`));
+
+  const syndicationTargets = [];
+  if (crossPostToDevTo) syndicationTargets.push("dev.to");
+  if (crossPostToHashnode) syndicationTargets.push("Hashnode");
+  if (crossPostToMedium) syndicationTargets.push("Medium");
+  if (crossPostToBluesky) syndicationTargets.push("Bluesky");
+  if (crossPostToWordpress) syndicationTargets.push("WordPress");
+
+  if (syndicationTargets.length > 0) {
+    console.log(pc.dim(`Syndication: ${syndicationTargets.join(", ")}`));
+  } else {
+    console.log(pc.dim("Syndication: ZyVOP only"));
+  }
+  console.log();
+
+  const spinner = ora(
+    "Broadcasting article to ZyVOP and connected targets...",
+  ).start();
+
+  // Convert raw Markdown content to semantic HTML for ZyVOP's reader & editor
+  let contentToParse = content;
+  if (baseUrl) {
+    const cleanBase = baseUrl.replace(/\/+$/, "");
+    contentToParse = contentToParse.replace(
+      /!\[([^\]]*)\]\(\s*(\/[^)\s]+)\s*\)/g,
+      `![$1](${cleanBase}$2)`,
+    );
+  }
+  const htmlContent = marked.parse(contentToParse);
+
   if (token.startsWith("zv_")) {
     try {
       const rawMarkdown = fs.readFileSync(resolvedPath, "utf-8");
       const post = await publishArticleRestApi(rawMarkdown, token, endpoint);
-      spinner.succeed(
-        pc.green(pc.bold("Article published successfully! 🎉\n")),
-      );
+      const isUpdated = post.action === "updated";
+      const successMsg = isUpdated
+        ? "Article updated successfully! 🔄\n"
+        : "Article published successfully! 🎉\n";
+      spinner.succeed(pc.green(pc.bold(successMsg)));
       const liveUrl = post.url || resolveWebUrl(post.slug, endpoint);
       console.log(
         pc.bold("────────────────────────────────────────────────────────────"),
       );
       console.log(`  🌐 ${pc.bold("ZyVOP Live URL:")}  ${pc.cyan(liveUrl)}`);
+      if (isUpdated) {
+        console.log(`  ⚡ ${pc.bold("Action:")}          ${pc.yellow("Updated existing article")}`);
+      } else {
+        console.log(`  ⚡ ${pc.bold("Action:")}          ${pc.green("Created new article")}`);
+      }
       console.log(
         pc.bold(
           "────────────────────────────────────────────────────────────\n",
