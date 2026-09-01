@@ -1,6 +1,6 @@
 {
   "name": "zyvop",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Official CLI for ZyVOP - Write once in Markdown and cross-post to Dev.to, Hashnode, Medium & Bluesky.",
   "type": "module",
   "bin": {
@@ -14,11 +14,11 @@
     "sample-post.md"
   ],
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "scripts": {
     "start": "node ./bin/zyvop.js",
-    "test": "echo \"Error: no test specified\" && exit 0"
+    "test": "node --test"
   },
   "repository": {
     "type": "git",

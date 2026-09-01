@@ -53,6 +53,7 @@ title: Building Scalable Microservices with Go
 subtitle: A practical deep-dive into distributed architecture
 tags: [golang, backend, microservices, docker]
 canonical_url: https://myblog.com/go-microservices
+base_url: https://myblog.com/
 category: backend
 generate_toc: true
 cross_post:
@@ -89,25 +90,25 @@ ZyVOP will:
 
 Publishes or updates a Markdown file to ZyVOP and connected syndication targets.
 
-| Flag                           | Description                                                                          |
-| ------------------------------ | ------------------------------------------------------------------------------------ |
-| `-d, --dry-run`                | Preview resolved frontmatter, image URLs, and syndication targets without publishing |
-| `--base-url <url>`             | Base URL for resolving relative image links (e.g. `/blog/cover.webp`)                |
-| `--title <string>`             | Override article title                                                               |
-| `--subtitle <string>`          | Subtitle or description                                                              |
-| `--tags <list>`                | Comma-separated tags (e.g. `react,nextjs,typescript`)                                |
-| `--category <slug>`            | Category slug (e.g. `frontend`, `backend`, `devops`)                                 |
-| `--canonical <url>`            | Custom canonical URL for SEO                                                         |
-| `--cover <url>`                | Header cover image URL (absolute or relative to `--base-url`/`canonical_url`)        |
-| `--draft`                      | Save as draft instead of publishing live                                             |
-| `--toc`                        | Generate and render a floating Table of Contents                                     |
-| `--devto` / `--no-devto`       | Explicitly enable / disable Dev.to cross-posting                                     |
-| `--hashnode` / `--no-hashnode` | Explicitly enable / disable Hashnode cross-posting                                   |
-| `--medium` / `--no-medium`     | Explicitly enable / disable Medium cross-posting                                     |
-| `--bluesky` / `--no-bluesky`   | Explicitly enable / disable Bluesky link broadcast                                   |
-| `--wordpress`                  | Enable WordPress cross-posting                                                       |
-| `-t, --token <token>`          | ZyVOP API token (overrides stored token)                                             |
-| `--endpoint <url>`             | Custom GraphQL endpoint URL                                                          |
+| Flag                           | Description                                                                         |
+| ------------------------------ | ----------------------------------------------------------------------------------- |
+| `-d, --dry-run`                | Locally validate and preview the exact payload without authentication or publishing |
+| `--base-url <url>`             | Base URL for resolving relative image links (e.g. `/blog/cover.webp`)               |
+| `--title <string>`             | Override article title                                                              |
+| `--subtitle <string>`          | Subtitle or description                                                             |
+| `--tags <list>`                | Comma-separated tags (e.g. `react,nextjs,typescript`)                               |
+| `--category <slug>`            | Category slug (e.g. `frontend`, `backend`, `devops`)                                |
+| `--canonical <url>`            | Custom canonical URL for SEO                                                        |
+| `--cover <url>`                | Header cover image URL (absolute or relative to `--base-url`/`canonical_url`)       |
+| `--draft`                      | Save as draft instead of publishing live                                            |
+| `--toc`                        | Generate and render a floating Table of Contents                                    |
+| `--devto` / `--no-devto`       | Explicitly enable / disable Dev.to cross-posting                                    |
+| `--hashnode` / `--no-hashnode` | Explicitly enable / disable Hashnode cross-posting                                  |
+| `--medium` / `--no-medium`     | Explicitly enable / disable Medium cross-posting                                    |
+| `--bluesky` / `--no-bluesky`   | Explicitly enable / disable Bluesky link broadcast                                  |
+| `--wordpress`                  | Enable WordPress cross-posting                                                      |
+| `-t, --token <token>`          | ZyVOP API token (overrides stored token)                                            |
+| `--endpoint <url>`             | Custom GraphQL endpoint URL                                                         |
 
 ---
 
@@ -115,9 +116,18 @@ Publishes or updates a Markdown file to ZyVOP and connected syndication targets.
 
 ZyVOP is built for Git-backed and headless blogging workflows.
 
-- **Safe Extra Frontmatter:** You can safely keep any custom frontmatter fields required by your own site generator (e.g. Next.js, Contentlayer, Astro, Hugo such as `layout`, `readingTime`, `author`, `featured`). Unknown keys are safely ignored and will never cause validation errors.
-- **Relative Images:** Relative paths for `cover_image` (e.g. `/blog/cover.webp`) and markdown body images are automatically resolved against your `base_url` frontmatter key or `canonical_url` domain.
-- **Idempotent Upsert (Update vs. Create):** Re-publishing an existing article updates the existing post on ZyVOP and only broadcasts to platforms that haven't been synced yet, preventing duplicate posts.
+- **Safe Extra Frontmatter:** Keep custom fields required by Next.js, Contentlayer, Astro, Hugo, or another site generator. The CLI preserves unknown keys in the developer-token payload, while ZyVOP ignores fields outside its API schema.
+- **Relative Images:** Root-relative (`/blog/cover.webp`) and file-relative (`./cover.webp` or `../cover.webp`) cover and body images are resolved with `base_url`, `--base-url`, or the origin of `canonical_url`. Only HTTP(S) base URLs are accepted.
+- **Consistent Overrides:** Developer-token publishing sends the same normalized values shown by `--dry-run`, including cover, status, tags, and cross-post flags.
+- **Update vs. Create:** With a developer token (`zv_...`), the API reports whether it created or updated the post. Use a stable `canonical_url`, `zyvop_id`, `id`, or `slug` in frontmatter for repeatable Git publishing. Password-session GraphQL publishing updates only when `zyvop_id`/`id` or `slug` identifies an owned post; otherwise it creates a post.
+
+Dry-run is intentionally local and read-only:
+
+```bash
+zyvop publish ./my-article.md --dry-run --base-url https://myblog.com/
+```
+
+It validates and displays the payload and requested syndication targets without requiring a token. Because it does not contact ZyVOP or external platforms, final create/update decisions are reported only by the real publish command.
 
 ---
 
@@ -149,7 +159,7 @@ Clears the local credentials stored in `~/.zyvop/config.json`.
 
 ## Continuous Deployment (GitHub Actions)
 
-To automatically publish new and modified articles whenever you push to your repository:
+To automatically publish new and modified articles whenever you push to your repository, create a developer token in ZyVOP and store it as the `ZYVOP_TOKEN` repository secret. Give every article a stable `canonical_url` or `zyvop_id` so repeat publishes can be matched safely.
 
 ```yaml
 # .github/workflows/publish.yml
@@ -161,6 +171,14 @@ on:
     paths:
       - "posts/**.md"
 
+permissions:
+  contents: read
+
+# Do not let rapid pushes publish the same article concurrently.
+concurrency:
+  group: zyvop-publish-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -168,7 +186,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2 # Fetch previous commit to calculate diffs
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -179,17 +197,31 @@ jobs:
         env:
           ZYVOP_TOKEN: ${{ secrets.ZYVOP_TOKEN }}
         run: |
-          # Get list of added or modified markdown files
-          FILES=$(git diff --name-only --diff-filter=ACMR HEAD~1 HEAD | grep '^posts/.*\.md$' || true)
-          if [ -z "$FILES" ]; then
+          set -euo pipefail
+
+          before="${{ github.event.before }}"
+          after="${{ github.sha }}"
+
+          # A branch's first push has an all-zero before SHA. A force push can
+          # also reference an unavailable commit, so publish all tracked posts.
+          if [[ "$before" =~ ^0+$ ]] || ! git cat-file -e "$before^{commit}" 2>/dev/null; then
+            mapfile -d '' files < <(git ls-files -z -- ':(glob)posts/**/*.md')
+          else
+            mapfile -d '' files < <(
+              git diff --name-only -z --diff-filter=ACMR \
+                "$before" "$after" -- ':(glob)posts/**/*.md'
+            )
+          fi
+
+          if (( ${#files[@]} == 0 )); then
             echo "No Markdown files changed."
             exit 0
           fi
 
-          for file in $FILES; do
+          for file in "${files[@]}"; do
             if [ -f "$file" ]; then
               echo "Deploying $file..."
-              npx zyvop publish "$file"
+              npx --yes zyvop@1.0.9 publish "$file"
             fi
           done
 ```

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
+import { createRequire } from "node:module";
 import pc from "picocolors";
 import { loginCommand } from "../src/commands/login.js";
 import { whoamiCommand, logoutCommand } from "../src/commands/whoami.js";
@@ -8,6 +9,8 @@ import { publishCommand } from "../src/commands/publish.js";
 import { importCommand } from "../src/commands/import.js";
 
 const program = new Command();
+const require = createRequire(import.meta.url);
+const { version } = require("../package.json");
 
 program
   .name("zyvop")
@@ -15,7 +18,7 @@ program
     pc.bold(pc.cyan("ZyVOP CLI")) +
       " — Write once in Markdown and cross-post to dev.to, Hashnode, Medium & Bluesky.",
   )
-  .version("1.0.8", "-v, --version", "Output the current version of ZyVOP CLI");
+  .version(version, "-v, --version", "Output the current version of ZyVOP CLI");
 
 // 1. login
 program
@@ -60,8 +63,14 @@ program
   .option("--series <seriesId>", "Series ID to attach this article to")
   .option("--cover <url>", "Cover image URL")
   .option("--canonical <url>", "Custom canonical URL")
-  .option("--base-url <url>", "Base URL for resolving relative images and asset links")
-  .option("-d, --dry-run", "Preview resolved metadata and syndication targets without publishing")
+  .option(
+    "--base-url <url>",
+    "Base URL for resolving relative images and asset links",
+  )
+  .option(
+    "-d, --dry-run",
+    "Validate and preview the local payload without authentication or publishing",
+  )
   .option("--toc", "Enable generated Table of Contents")
   .option("--draft", "Publish as a Draft instead of public")
   .option("--devto", "Force enable cross-posting to dev.to")

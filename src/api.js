@@ -43,13 +43,19 @@ export async function graphqlRequest({
   return json.data;
 }
 
-export async function publishArticleRestApi(rawMarkdown, token, endpoint = 'https://zyvop.com') {
-  const baseUrl = endpoint.includes('/graphql') ? endpoint.replace('/graphql', '') : endpoint;
+export async function publishArticleRestApi(
+  rawMarkdown,
+  token,
+  endpoint = "https://zyvop.com",
+) {
+  const baseUrl = endpoint.includes("/graphql")
+    ? endpoint.replace(/\/graphql\/?$/, "")
+    : endpoint.replace(/\/+$/, "");
   const res = await fetch(`${baseUrl}/api/v1/articles`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ content: rawMarkdown }),
   });
@@ -60,7 +66,7 @@ export async function publishArticleRestApi(rawMarkdown, token, endpoint = 'http
   }
   return {
     ...(data.data || {}),
-    action: data.action || 'published',
+    action: data.action || "published",
   };
 }
 
@@ -162,6 +168,53 @@ export async function createPostApi(input, token, endpoint) {
   });
 
   return data.createPost;
+}
+
+const OWNED_POST_FIELDS = `
+  id
+  slug
+  title
+  status
+  devToArticleUrl
+  hashnodeArticleUrl
+  mediumArticleUrl
+  blueskyPostUrl
+  wordpressArticleUrl
+  crossPostErrors
+`;
+
+export async function getOwnedPostApi({ id, slug }, token, endpoint) {
+  if (!id && !slug) return null;
+
+  const query = id
+    ? `query GetMyPost($id: ID!) { getMyPost(id: $id) { ${OWNED_POST_FIELDS} } }`
+    : `query GetMyPostBySlug($slug: String!) { getMyPostBySlug(slug: $slug) { ${OWNED_POST_FIELDS} } }`;
+  const data = await graphqlRequest({
+    query,
+    variables: id ? { id } : { slug },
+    token,
+    endpoint,
+  });
+
+  return id ? data.getMyPost : data.getMyPostBySlug;
+}
+
+export async function updatePostApi(input, token, endpoint) {
+  const query = `
+    mutation UpdatePost($input: UpdatePostInput!) {
+      updatePost(input: $input) {
+        ${OWNED_POST_FIELDS}
+      }
+    }
+  `;
+  const data = await graphqlRequest({
+    query,
+    variables: { input },
+    token,
+    endpoint,
+  });
+
+  return data.updatePost;
 }
 
 export async function importPostsApi(source, identifier, token, endpoint) {
