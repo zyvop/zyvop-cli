@@ -22,10 +22,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zyvop27-cmyk/zyvop-cli.git"
+    "url": "git+https://github.com/zyvop/zyvop-cli.git"
   },
   "bugs": {
-    "url": "https://github.com/zyvop27-cmyk/zyvop-cli/issues"
+    "url": "https://github.com/zyvop/zyvop-cli/issues"
   },
   "homepage": "https://zyvop.com",
   "keywords": [
