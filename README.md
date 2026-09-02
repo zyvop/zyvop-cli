@@ -221,7 +221,7 @@ jobs:
           for file in "${files[@]}"; do
             if [ -f "$file" ]; then
               echo "Deploying $file..."
-              npx --yes zyvop@1.0.9 publish "$file"
+              npx --yes zyvop@1.0.10 publish "$file"
             fi
           done
 ```
