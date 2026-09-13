@@ -82,6 +82,11 @@ program
   .option("--bluesky", "Broadcast article link to Bluesky")
   .option("--no-bluesky", "Disable Bluesky broadcast")
   .option("--wordpress", "Enable cross-posting to WordPress")
+  .option("--no-wordpress", "Disable cross-posting to WordPress")
+  .option(
+    "--local",
+    "Cross-post directly from this machine using ZYVOP_* provider environment variables",
+  )
   .option("-t, --token <token>", "ZyVOP API token or env ZYVOP_TOKEN")
   .option("--endpoint <url>", "Custom GraphQL endpoint")
   .action(publishCommand);

@@ -23,11 +23,16 @@ export function getStoredConfig() {
 export function saveStoredConfig(newConfig) {
   try {
     if (!fs.existsSync(CONFIG_DIR)) {
-      fs.mkdirSync(CONFIG_DIR, { recursive: true });
+      fs.mkdirSync(CONFIG_DIR, { recursive: true, mode: 0o700 });
     }
+    fs.chmodSync(CONFIG_DIR, 0o700);
     const existing = getStoredConfig();
     const merged = { ...existing, ...newConfig };
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(merged, null, 2), 'utf-8');
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify(merged, null, 2), {
+      encoding: 'utf-8',
+      mode: 0o600,
+    });
+    fs.chmodSync(CONFIG_FILE, 0o600);
     return merged;
   } catch (err) {
     throw new Error(`Failed to save config: ${err.message}`);
@@ -58,7 +63,7 @@ export function resolveEndpoint(cmdOption) {
 
 export function resolveWebUrl(slug = '', endpoint = '') {
   const cleanSlug = slug.replace(/^\//, '');
-  
+
   if (process.env.ZYVOP_WEB_URL) {
     const base = process.env.ZYVOP_WEB_URL.replace(/\/+$/, '');
     return cleanSlug ? `${base}/${cleanSlug}` : base;

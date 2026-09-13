@@ -82,6 +82,39 @@ ZyVOP will:
 3. Queue background workers to syndicate the article to Dev.to, Hashnode, Medium, WordPress, and Bluesky.
 4. Set canonical URL headers on all targets pointing to your primary post.
 
+### Keep provider credentials local
+
+Use `--local` to publish to Dev.to, Hashnode, Medium, WordPress, and Bluesky
+directly from the CLI. In this mode ZyVOP receives the article with server-side
+cross-posting disabled. Provider credentials are read from the current process
+environment, sent only to the selected provider, and are never uploaded to ZyVOP
+or written to the CLI config.
+
+```bash
+# Set these with your shell, CI secret store, or local secret manager.
+export ZYVOP_TOKEN="..."
+export ZYVOP_DEVTO_API_KEY="..."
+
+zyvop publish ./my-article.md --local --devto --no-hashnode
+```
+
+Only configure variables for destinations selected by flags or frontmatter:
+
+| Destination | Environment variables                                                             |
+| ----------- | --------------------------------------------------------------------------------- |
+| Dev.to      | `ZYVOP_DEVTO_API_KEY`                                                             |
+| Hashnode    | `ZYVOP_HASHNODE_API_KEY`                                                          |
+| Medium      | `ZYVOP_MEDIUM_API_TOKEN`                                                          |
+| Bluesky     | `ZYVOP_BLUESKY_IDENTIFIER`, `ZYVOP_BLUESKY_APP_PASSWORD`                          |
+| WordPress   | `ZYVOP_WORDPRESS_URL`, `ZYVOP_WORDPRESS_USERNAME`, `ZYVOP_WORDPRESS_APP_PASSWORD` |
+
+Do not pass secrets as command-line arguments or commit them to a repository.
+Local mode updates matching Dev.to and Hashnode posts by canonical URL, matching
+WordPress posts by slug, and uses a deterministic Bluesky record. Medium's API
+does not support updating a published story, so repeated local publishes to
+Medium can create another story. Remote IDs and URLs produced in local mode are
+shown in the terminal but are not currently synchronized to the ZyVOP dashboard.
+
 ---
 
 ## Command Reference
@@ -90,25 +123,26 @@ ZyVOP will:
 
 Publishes or updates a Markdown file to ZyVOP and connected syndication targets.
 
-| Flag                           | Description                                                                         |
-| ------------------------------ | ----------------------------------------------------------------------------------- |
-| `-d, --dry-run`                | Locally validate and preview the exact payload without authentication or publishing |
-| `--base-url <url>`             | Base URL for resolving relative image links (e.g. `/blog/cover.webp`)               |
-| `--title <string>`             | Override article title                                                              |
-| `--subtitle <string>`          | Subtitle or description                                                             |
-| `--tags <list>`                | Comma-separated tags (e.g. `react,nextjs,typescript`)                               |
-| `--category <slug>`            | Category slug (e.g. `frontend`, `backend`, `devops`)                                |
-| `--canonical <url>`            | Custom canonical URL for SEO                                                        |
-| `--cover <url>`                | Header cover image URL (absolute or relative to `--base-url`/`canonical_url`)       |
-| `--draft`                      | Save as draft instead of publishing live                                            |
-| `--toc`                        | Generate and render a floating Table of Contents                                    |
-| `--devto` / `--no-devto`       | Explicitly enable / disable Dev.to cross-posting                                    |
-| `--hashnode` / `--no-hashnode` | Explicitly enable / disable Hashnode cross-posting                                  |
-| `--medium` / `--no-medium`     | Explicitly enable / disable Medium cross-posting                                    |
-| `--bluesky` / `--no-bluesky`   | Explicitly enable / disable Bluesky link broadcast                                  |
-| `--wordpress`                  | Enable WordPress cross-posting                                                      |
-| `-t, --token <token>`          | ZyVOP API token (overrides stored token)                                            |
-| `--endpoint <url>`             | Custom GraphQL endpoint URL                                                         |
+| Flag                             | Description                                                                         |
+| -------------------------------- | ----------------------------------------------------------------------------------- |
+| `-d, --dry-run`                  | Locally validate and preview the exact payload without authentication or publishing |
+| `--base-url <url>`               | Base URL for resolving relative image links (e.g. `/blog/cover.webp`)               |
+| `--title <string>`               | Override article title                                                              |
+| `--subtitle <string>`            | Subtitle or description                                                             |
+| `--tags <list>`                  | Comma-separated tags (e.g. `react,nextjs,typescript`)                               |
+| `--category <slug>`              | Category slug (e.g. `frontend`, `backend`, `devops`)                                |
+| `--canonical <url>`              | Custom canonical URL for SEO                                                        |
+| `--cover <url>`                  | Header cover image URL (absolute or relative to `--base-url`/`canonical_url`)       |
+| `--draft`                        | Save as draft instead of publishing live                                            |
+| `--toc`                          | Generate and render a floating Table of Contents                                    |
+| `--devto` / `--no-devto`         | Explicitly enable / disable Dev.to cross-posting                                    |
+| `--hashnode` / `--no-hashnode`   | Explicitly enable / disable Hashnode cross-posting                                  |
+| `--medium` / `--no-medium`       | Explicitly enable / disable Medium cross-posting                                    |
+| `--bluesky` / `--no-bluesky`     | Explicitly enable / disable Bluesky link broadcast                                  |
+| `--wordpress` / `--no-wordpress` | Explicitly enable / disable WordPress cross-posting                                 |
+| `--local`                        | Call provider APIs locally; provider credentials stay in environment variables      |
+| `-t, --token <token>`            | ZyVOP API token (overrides stored token)                                            |
+| `--endpoint <url>`               | Custom GraphQL endpoint URL                                                         |
 
 ---
 
