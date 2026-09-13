@@ -1,6 +1,6 @@
 {
   "name": "zyvop",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Official CLI for ZyVOP - Write once in Markdown and cross-post to Dev.to, Hashnode, Medium & Bluesky.",
   "type": "module",
   "bin": {

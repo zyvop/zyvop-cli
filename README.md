@@ -193,11 +193,19 @@ Clears the local credentials stored in `~/.zyvop/config.json`.
 
 ## Continuous Deployment (GitHub Actions)
 
-To automatically publish new and modified articles whenever you push to your repository, create a developer token in ZyVOP and store it as the `ZYVOP_TOKEN` repository secret. Give every article a stable `canonical_url` or `zyvop_id` so repeat publishes can be matched safely.
+Automatically publish new and modified articles whenever you push to your
+repository. Give every article a stable `canonical_url` or `zyvop_id` so repeat
+publishes can be matched safely.
+
+The recommended private-runner mode keeps provider credentials out of ZyVOP.
+Store the ZyVOP developer token and the credentials for your selected
+destinations in GitHub Actions secrets, then run the CLI with `--local`.
+GitHub passes those secrets to the temporary Actions runner, and the CLI sends
+each provider credential only to that provider.
 
 ```yaml
 # .github/workflows/publish.yml
-name: Publish to ZyVOP
+name: Publish everywhere with ZyVOP
 
 on:
   push:
@@ -230,6 +238,15 @@ jobs:
       - name: Detect Changed Markdown Posts & Publish
         env:
           ZYVOP_TOKEN: ${{ secrets.ZYVOP_TOKEN }}
+          # Add only the provider secrets used by your articles.
+          ZYVOP_DEVTO_API_KEY: ${{ secrets.ZYVOP_DEVTO_API_KEY }}
+          ZYVOP_HASHNODE_API_KEY: ${{ secrets.ZYVOP_HASHNODE_API_KEY }}
+          ZYVOP_MEDIUM_API_TOKEN: ${{ secrets.ZYVOP_MEDIUM_API_TOKEN }}
+          ZYVOP_BLUESKY_IDENTIFIER: ${{ secrets.ZYVOP_BLUESKY_IDENTIFIER }}
+          ZYVOP_BLUESKY_APP_PASSWORD: ${{ secrets.ZYVOP_BLUESKY_APP_PASSWORD }}
+          ZYVOP_WORDPRESS_URL: ${{ secrets.ZYVOP_WORDPRESS_URL }}
+          ZYVOP_WORDPRESS_USERNAME: ${{ secrets.ZYVOP_WORDPRESS_USERNAME }}
+          ZYVOP_WORDPRESS_APP_PASSWORD: ${{ secrets.ZYVOP_WORDPRESS_APP_PASSWORD }}
         run: |
           set -euo pipefail
 
@@ -255,10 +272,18 @@ jobs:
           for file in "${files[@]}"; do
             if [ -f "$file" ]; then
               echo "Deploying $file..."
-              npx --yes zyvop@1.0.10 publish "$file"
+              npx --yes zyvop@1.1.1 publish "$file" --local
             fi
           done
 ```
+
+Select destinations with each article's `cross_post` frontmatter. Credentials
+for unselected destinations are not required. Never place credential values in
+the workflow file or repository.
+
+If you prefer ZyVOP-managed cross-posting, keep only `ZYVOP_TOKEN` in the
+workflow and remove `--local`. The connected provider credentials from your
+ZyVOP integration settings will then be used by the ZyVOP server.
 
 ---
 
