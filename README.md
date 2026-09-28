@@ -212,10 +212,8 @@ steps:
       ZYVOP_TOKEN: ${{ secrets.ZYVOP_TOKEN }}
 ```
 
-Start from the complete
-[ZyVOP blog template](https://github.com/zyvop/zyvop-blog-starter), or use the
-standalone workflow below when you want to own all of the changed-file logic in
-your repository.
+Use the standalone workflow below when you want to own all of the changed-file
+logic in your repository.
 
 The recommended private-runner mode keeps provider credentials out of ZyVOP.
 Store the ZyVOP developer token and the credentials for your selected
