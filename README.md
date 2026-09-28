@@ -197,6 +197,26 @@ Automatically publish new and modified articles whenever you push to your
 repository. Give every article a stable `canonical_url` or `zyvop_id` so repeat
 publishes can be matched safely.
 
+### Reusable action
+
+The shortest setup uses the [ZyVOP Publish Action](https://github.com/zyvop/publish-action):
+
+```yaml
+steps:
+  - uses: actions/checkout@v4
+    with:
+      fetch-depth: 0
+
+  - uses: zyvop/publish-action@v1
+    env:
+      ZYVOP_TOKEN: ${{ secrets.ZYVOP_TOKEN }}
+```
+
+Start from the complete
+[ZyVOP blog template](https://github.com/zyvop/zyvop-blog-starter), or use the
+standalone workflow below when you want to own all of the changed-file logic in
+your repository.
+
 The recommended private-runner mode keeps provider credentials out of ZyVOP.
 Store the ZyVOP developer token and the credentials for your selected
 destinations in GitHub Actions secrets, then run the CLI with `--local`.
