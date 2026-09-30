@@ -23,6 +23,7 @@
 ## A
 
 - [agent-tooling.md](agent-tooling.md) — local skill installation and public dashboard publishing choices
+- [authentication.md](authentication.md) — where CLI and provider credentials are read and stored
 
 ## B
 
@@ -39,8 +40,6 @@
 ## H
 
 ## I
-
-- [authentication.md](authentication.md) — where CLI and provider credentials are read and stored
 
 ## J
 

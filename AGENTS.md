@@ -2,6 +2,7 @@
 
 - CLI usage and setup: see `README.md`.
 - Project rationale: see `context/index.md`; read it before non-trivial changes.
+- Published project dashboard: https://zyvop.github.io/zyvop-cli/dashboard/live/
 
 ## Keep the Why
 

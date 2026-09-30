@@ -2,7 +2,7 @@
 
 ## Stable identities make repeat publishes update existing articles
 
-**Id:** F909FD67-A210-4E84-B3F6-1B1B4FFBCC56
+**Id:** f909fd67-a210-4e84-b3f6-1b1b4ffbcc56
 **Type:** decision
 **Status:** active
 **Evidence:** confirmed
@@ -26,7 +26,7 @@ identity or reconciliation strategy.
 
 ## Preserve frontmatter owned by the source site
 
-**Id:** FB023ED8-A937-4BE6-B2F6-B527821C5BFD
+**Id:** fb023ed8-a937-4be6-b2f6-b527821c5bfd
 **Type:** decision
 **Status:** active
 **Evidence:** confirmed
@@ -47,7 +47,7 @@ discard metadata the source site still needs.
 
 ## Resolve relative assets from an explicit site base
 
-**Id:** 459FCB9F-14F9-4061-A9BA-D1A068CDD882
+**Id:** 459fcb9f-14f9-4061-a9ba-d1a068cdd882
 **Type:** decision
 **Type:** constraint
 **Status:** active
@@ -73,7 +73,7 @@ or unsupported asset reference.
 
 ## Dry-run stays local and read-only
 
-**Id:** 3D3E2105-7849-43C9-8B31-756E38AEE3C1
+**Id:** 3d3e2105-7849-43c9-8b31-756e38aee3c1
 **Type:** decision
 **Type:** constraint
 **Status:** active
@@ -95,7 +95,7 @@ and require authentication.
 
 ## An omitted status does not overwrite an existing status
 
-**Id:** CBA2CABC-F781-4C99-899E-AA567C0F75AA
+**Id:** cba2cabc-f781-4c99-899e-aa567c0f75aa
 **Type:** decision
 **Status:** active
 **Evidence:** inferred

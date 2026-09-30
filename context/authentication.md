@@ -2,7 +2,7 @@
 
 ## Provider credentials stay with local cross-posting
 
-**Id:** F5156FEF-8C85-47E7-889F-F5540D57254A
+**Id:** f5156fef-8c85-47e7-889f-f5540d57254a
 **Type:** decision
 **Type:** constraint
 **Status:** active
@@ -25,7 +25,7 @@ preserve.
 
 ## CLI login credentials use owner-only file permissions
 
-**Id:** D0D58B38-0802-4BC1-98EA-5F2694B15D2B
+**Id:** d0d58b38-0802-4bc1-98ea-5f2694b15d2b
 **Type:** constraint
 **Status:** active
 **Evidence:** inferred

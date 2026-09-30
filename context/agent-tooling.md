@@ -2,7 +2,7 @@
 
 ## The Keep the Why skill remains a local install
 
-**Id:** F6ADDD80-FBAE-4ED5-A18B-D8B051E67552
+**Id:** f6addd80-fbae-4ed5-a18b-d8b051e67552
 **Type:** decision
 **Status:** active
 **Evidence:** confirmed
@@ -23,7 +23,7 @@ maintainer explicitly asked to keep that directory out of pushes.
 
 ## GitHub Pages publishes the project dashboard
 
-**Id:** 591EF816-419D-47EA-9FE0-3C1008DBDF7C
+**Id:** 591ef816-419d-47ea-9fe0-3c1008dbdf7c
 **Type:** decision
 **Status:** active
 **Evidence:** confirmed
@@ -44,7 +44,7 @@ Public Pages publishing was explicitly selected.
 
 ## Dashboard exports anonymize commit authors
 
-**Id:** 6F39C3E4-2FFD-4994-B16A-8543BD0BC343
+**Id:** 6f39c3e4-2ffd-4994-b16a-8543bd0bc343
 **Type:** decision
 **Status:** active
 **Evidence:** unknown
