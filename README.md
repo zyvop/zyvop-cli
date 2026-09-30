@@ -1,4 +1,5 @@
 [![Keep the Why](https://keepthewhy.com/assets/badge.svg)](https://keepthewhy.com)
+[![Keep the Why live](https://zyvop.github.io/zyvop-cli/dashboard/live/badge.svg)](https://zyvop.github.io/zyvop-cli/dashboard/live/)
 
 # ZyVOP CLI
 

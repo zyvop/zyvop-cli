@@ -1,0 +1,41 @@
+name: Publish Keep the Why dashboard
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".keep-the-why"
+      - "context/**"
+      - ".github/workflows/ktw-dashboard.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: pip install --quiet keep-the-why-dashboard
+      - run: ktw-dashboard --export site/dashboard/live . --anonymize
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -4,6 +4,7 @@ This is machine-readable project state for the Keep the Why skill
 <!-- keep-the-why:config -->
 - id: zyvop---zyvop-cli
 - canonical: https://github.com/zyvop/zyvop-cli
+- dashboard-state: https://zyvop.github.io/zyvop-cli/dashboard/live/state.json
 - context: `context/`
 - init: complete
 - context-schema: 0.18.1
