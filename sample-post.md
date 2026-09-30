@@ -31,7 +31,7 @@ This article demonstrates every metadata feature supported by ZyVOP:
 - **Subtitle & Excerpt:** Used for article summaries and Google search snippets.
 - **SEO & Open Graph:** Custom search engine titles/descriptions and social share card overrides.
 - **Tags & Category:** Automatically categorizes your article into backend/frontend tag feeds.
-- **Canonical URL:** Protects your domain authority on search engines.
+- **Canonical URL:** Identifies your preferred source to search engines and supported syndication destinations.
 - **Table of Contents:** Auto-generated from headings.
 - **Syndication Targets:** Cross-posts simultaneously to Dev.to, Hashnode, Medium, Bluesky, and WordPress.
 

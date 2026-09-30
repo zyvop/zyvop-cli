@@ -1,3 +1,5 @@
+[![Keep the Why](https://keepthewhy.com/assets/badge.svg)](https://keepthewhy.com)
+
 # ZyVOP CLI
 
 Command-line client for publishing Markdown articles to ZyVOP and cross-posting to Dev.to, Hashnode, Medium, WordPress, and Bluesky.

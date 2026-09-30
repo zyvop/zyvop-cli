@@ -1,0 +1,12 @@
+This is machine-readable project state for the Keep the Why skill
+(https://keepthewhy.com). See context/index.md for this project's why-knowledge.
+
+<!-- keep-the-why:config -->
+- id: zyvop---zyvop-cli
+- canonical: https://github.com/zyvop/zyvop-cli
+- context: `context/`
+- init: complete
+- context-schema: 0.18.1
+- capture-confirmation: confirm-when-unsure
+- source-reference: never
+<!-- /keep-the-why:config -->
