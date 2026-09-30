@@ -22,6 +22,8 @@
 
 ## A
 
+- [agent-tooling.md](agent-tooling.md) — local skill installation and public dashboard publishing choices
+
 ## B
 
 ## C
@@ -38,6 +40,8 @@
 
 ## I
 
+- [authentication.md](authentication.md) — where CLI and provider credentials are read and stored
+
 ## J
 
 ## K
@@ -51,6 +55,8 @@
 ## O
 
 ## P
+
+- [publishing.md](publishing.md) — payload compatibility, dry-run, and repeat-publish behavior
 
 ## Q
 

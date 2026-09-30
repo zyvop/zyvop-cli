@@ -6,6 +6,7 @@ on:
     paths:
       - ".keep-the-why"
       - "context/**"
+      - "index.html"
       - ".github/workflows/ktw-dashboard.yml"
   workflow_dispatch:
 
@@ -33,6 +34,8 @@ jobs:
           python-version: "3.x"
       - run: pip install --quiet keep-the-why-dashboard
       - run: ktw-dashboard --export site/dashboard/live . --anonymize
+      - name: Add Pages landing page
+        run: cp index.html site/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
