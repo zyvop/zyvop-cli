@@ -1,4 +1,5 @@
 [![Keep the Why live](https://zyvop.github.io/zyvop-cli/dashboard/live/badge-entries.svg)](https://zyvop.github.io/zyvop-cli/dashboard/live/)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-ZyVOP%20Publish-blue?logo=github&logoColor=white)](https://github.com/marketplace/actions/zyvop-publish)
 
 # ZyVOP CLI
 
