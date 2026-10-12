@@ -3,11 +3,15 @@
 
 # ZyVOP CLI
 
-Command-line client for publishing Markdown articles to ZyVOP and cross-posting to Dev.to, Hashnode, Medium, WordPress, and Bluesky.
+Write once in Markdown, then publish from your terminal or CI. The ZyVOP CLI publishes a Markdown file to ZyVOP and cross-posts it to Dev.to, Hashnode, Medium, WordPress, and Bluesky, using destinations chosen in the file's frontmatter.
+
+Core publishing and syndication are free. See [pricing](https://zyvop.com/pricing).
 
 ---
 
 ## Installation
+
+Requires Node.js 20 or newer.
 
 Run directly with `npx`:
 
@@ -19,6 +23,14 @@ Or install globally via npm:
 
 ```bash
 npm install -g zyvop
+```
+
+### Try it without an account
+
+A dry run validates your article and previews the payload locally. It needs no token and makes no network requests:
+
+```bash
+npx zyvop publish ./sample-post.md --dry-run
 ```
 
 ---
@@ -83,7 +95,7 @@ ZyVOP will:
 1. Parse the frontmatter and render Markdown into semantic HTML.
 2. Publish the post to ZyVOP.
 3. Queue background workers to syndicate the article to Dev.to, Hashnode, Medium, WordPress, and Bluesky.
-4. Set canonical URL headers on all targets pointing to your primary post.
+4. Set the canonical URL on Dev.to, Hashnode, and supported Medium flows. WordPress copies get an "Originally published at" line linking to your primary post, and Bluesky receives a link post.
 
 ### Keep provider credentials local
 
@@ -305,6 +317,12 @@ the workflow file or repository.
 If you prefer ZyVOP-managed cross-posting, keep only `ZYVOP_TOKEN` in the
 workflow and remove `--local`. The connected provider credentials from your
 ZyVOP integration settings will then be used by the ZyVOP server.
+
+---
+
+## Run your publication on your own domain
+
+Founding Pro adds a custom domain with automatic SSL, standalone publication mode, and removable ZyVOP branding. See [plans and pricing](https://zyvop.com/pricing).
 
 ---
 

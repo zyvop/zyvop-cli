@@ -1,7 +1,7 @@
 {
   "name": "zyvop",
   "version": "1.1.2",
-  "description": "Official CLI for ZyVOP - Write once in Markdown and cross-post to Dev.to, Hashnode, Medium & Bluesky.",
+  "description": "Official CLI for ZyVOP. Write once in Markdown and cross-post to Dev.to, Hashnode, Medium, WordPress and Bluesky.",
   "type": "module",
   "bin": {
     "zyvop": "bin/zyvop.js"
@@ -38,6 +38,8 @@
     "hashnode",
     "medium",
     "bluesky",
+    "wordpress",
+    "canonical-url",
     "syndication",
     "github-actions"
   ],
