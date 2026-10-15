@@ -1,6 +1,7 @@
 import path from "node:path";
 import matter from "gray-matter";
 import { marked } from "marked";
+import { parseAiDisclosure } from "./ai-disclosure.js";
 
 const HTTP_PROTOCOLS = new Set(["http:", "https:"]);
 
@@ -274,6 +275,7 @@ export function buildPublishPayload({ filePath, rawFile, options = {} }) {
   if (typeof commentsEnabled !== "boolean") {
     throw new Error("comments_enabled must be true or false.");
   }
+  const aiDisclosure = parseAiDisclosure(frontmatter);
 
   const postId =
     optionalString(frontmatter.zyvop_id, "zyvop_id") ||
@@ -307,6 +309,21 @@ export function buildPublishPayload({ filePath, rawFile, options = {} }) {
   setIfDefined(normalizedFrontmatter, "og_title", ogTitle);
   setIfDefined(normalizedFrontmatter, "og_description", ogDescription);
   setIfDefined(normalizedFrontmatter, "generate_toc", generateTOC);
+  setIfDefined(
+    normalizedFrontmatter,
+    "ai_disclosure",
+    aiDisclosure.aiDisclosure,
+  );
+  setIfDefined(
+    normalizedFrontmatter,
+    "ai_disclosure_note",
+    aiDisclosure.aiDisclosureNote,
+  );
+  setIfDefined(
+    normalizedFrontmatter,
+    "ai_review_confirmed",
+    aiDisclosure.aiReviewConfirmed,
+  );
   normalizedFrontmatter.comments_enabled = commentsEnabled;
   normalizedFrontmatter.cross_post = crossPost;
   if (postId) normalizedFrontmatter.id = postId;
@@ -330,6 +347,7 @@ export function buildPublishPayload({ filePath, rawFile, options = {} }) {
     ogDescription,
     generateTOC,
     commentsEnabled,
+    ...aiDisclosure,
     postId,
     slug,
     content,

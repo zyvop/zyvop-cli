@@ -66,6 +66,9 @@ test("publish --local sends the provider key only to the provider", async (t) =>
     article,
     `---
 title: Local credential article
+ai_disclosure: ai_assisted
+ai_disclosure_note: AI helped structure the draft; the author verified the final article.
+ai_review_confirmed: true
 cross_post:
   devto: true
   hashnode: false
@@ -130,9 +133,12 @@ Body`,
     ({ url }) => url === "https://dev.to/api/articles",
   );
   const submittedMarkdown = matter(JSON.parse(zyvopRequest.init.body).content);
+  const devToArticle = JSON.parse(devToRequest.init.body).article;
 
   assert.equal(JSON.stringify(zyvopRequest).includes("provider-secret"), false);
   assert.equal(submittedMarkdown.data.cross_post.devto, false);
+  assert.equal(submittedMarkdown.data.ai_disclosure, "ai_assisted");
   assert.equal(devToRequest.init.headers["api-key"], "provider-secret");
+  assert.equal(devToArticle.ai_disclosure_level, "some_ai");
   assert.equal(process.exitCode, undefined);
 });

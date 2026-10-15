@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import matter from "gray-matter";
+import { toDevToAiDisclosureLevel } from "./ai-disclosure.js";
 
 const ALL_PLATFORMS = ["devto", "hashnode", "medium", "bluesky", "wordpress"];
 const HASHNODE_API_URL = "https://gql-beta.hashnode.com";
@@ -229,6 +230,7 @@ export async function publishToDevTo(context, credentials, fetchImpl = fetch) {
         main_image: payload.coverImage,
         canonical_url: canonicalUrl,
         description: payload.excerpt || payload.subtitle,
+        ai_disclosure_level: toDevToAiDisclosureLevel(payload.aiDisclosure),
         tags: payload.tagNames.slice(0, 4).map(sanitizeTag).filter(Boolean),
       },
     }),

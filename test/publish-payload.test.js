@@ -84,6 +84,46 @@ test("does not force the default published status into frontmatter", () => {
   assert.equal(matter(payload.normalizedMarkdown).data.status, undefined);
 });
 
+test("normalizes AI disclosure metadata for REST, GraphQL, and DEV", () => {
+  const payload = buildPublishPayload({
+    filePath: "article.md",
+    rawFile: `---
+title: Reviewed article
+aiDisclosure: ai-assisted
+aiDisclosureNote: "AI helped reorganize the draft; every claim was verified."
+aiReviewConfirmed: true
+---
+Body`,
+  });
+  const submitted = matter(payload.normalizedMarkdown);
+
+  assert.equal(payload.aiDisclosure, "ai_assisted");
+  assert.equal(payload.aiDisclosureLevel, "AI_ASSISTED");
+  assert.equal(payload.aiReviewConfirmed, true);
+  assert.equal(submitted.data.ai_disclosure, "ai_assisted");
+  assert.equal(submitted.data.ai_review_confirmed, true);
+});
+
+test("rejects invalid AI disclosure metadata before publishing", () => {
+  assert.throws(
+    () =>
+      buildPublishPayload({
+        filePath: "article.md",
+        rawFile: "---\ntitle: Invalid disclosure\nai_disclosure: maybe\n---\nBody",
+      }),
+    /ai_disclosure must be human_written, ai_assisted, or ai_generated/,
+  );
+  assert.throws(
+    () =>
+      buildPublishPayload({
+        filePath: "article.md",
+        rawFile:
+          "---\ntitle: Invalid review\nai_disclosure: ai_assisted\nai_review_confirmed: yes\n---\nBody",
+      }),
+    /ai_review_confirmed must be true or false/,
+  );
+});
+
 test("rejects unsafe or malformed base URLs", () => {
   assert.throws(
     () =>

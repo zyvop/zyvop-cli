@@ -59,6 +59,9 @@ canonical_url: https://myblog.com/go-microservices
 base_url: https://myblog.com/
 category: backend
 generate_toc: true
+ai_disclosure: ai_assisted
+ai_disclosure_note: AI helped reorganize the draft; the author verified every claim and code sample.
+ai_review_confirmed: true
 cross_post:
   devto: true
   hashnode: true
@@ -84,6 +87,18 @@ ZyVOP will:
 2. Publish the post to ZyVOP.
 3. Queue background workers to syndicate the article to Dev.to, Hashnode, Medium, WordPress, and Bluesky.
 4. Set canonical URL headers on all targets pointing to your primary post.
+
+### AI disclosure
+
+Newly published or scheduled articles must declare `ai_disclosure` as
+`human_written`, `ai_assisted`, or `ai_generated`. For AI-assisted and
+AI-generated articles, set `ai_review_confirmed: true` after a human has
+reviewed the complete article. `ai_disclosure_note` accepts up to 500
+characters of optional reader-facing context.
+
+The same declaration is sent through the REST and GraphQL publishing paths.
+With `--local --devto`, the CLI also maps it to DEV's native disclosure field.
+Drafts may omit the declaration while they are still being developed.
 
 ### Keep provider credentials local
 

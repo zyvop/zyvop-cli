@@ -48,7 +48,14 @@ test("password-session publishing updates a post identified by zyvop_id", async 
   const postId = "00000000-0000-4000-8000-000000000001";
   fs.writeFileSync(
     article,
-    `---\ntitle: Existing article\nzyvop_id: ${postId}\n---\nUpdated body`,
+    `---
+title: Existing article
+zyvop_id: ${postId}
+ai_disclosure: ai_generated
+ai_disclosure_note: AI produced the initial draft; the author reviewed and corrected it.
+ai_review_confirmed: true
+---
+Updated body`,
     "utf8",
   );
 
@@ -107,4 +114,6 @@ test("password-session publishing updates a post identified by zyvop_id", async 
   const update = operations.find(({ query }) => query.includes("UpdatePost("));
   assert.equal(update.variables.input.id, postId);
   assert.equal(update.variables.input.status, undefined);
+  assert.equal(update.variables.input.aiDisclosureLevel, "AI_GENERATED");
+  assert.equal(update.variables.input.aiReviewConfirmed, true);
 });

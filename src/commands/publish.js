@@ -87,6 +87,10 @@ export async function publishCommand(filePath, options) {
     ogDescription,
     generateTOC,
     commentsEnabled,
+    aiDisclosureLevel,
+    aiDisclosureNote,
+    aiReviewConfirmed,
+    aiDisclosureLabel,
     statusExplicit,
     postId,
     slug,
@@ -119,6 +123,7 @@ export async function publishCommand(filePath, options) {
       console.log(`  📝 ${pc.bold("Subtitle:")}        ${subtitle}`);
     if (excerpt) console.log(`  📜 ${pc.bold("Excerpt:")}         ${excerpt}`);
     console.log(`  🚦 ${pc.bold("Status:")}          ${status}`);
+    console.log(`  🤖 ${pc.bold("AI disclosure:")}   ${aiDisclosureLabel}`);
     if (canonicalUrl)
       console.log(
         `  🔗 ${pc.bold("Canonical URL:")}   ${pc.dim(canonicalUrl)}`,
@@ -265,6 +270,9 @@ export async function publishCommand(filePath, options) {
         ogDescription,
         generateTOC,
         commentsEnabled,
+        aiDisclosureLevel,
+        aiDisclosureNote,
+        aiReviewConfirmed,
         suppressAutoCrossPost: options.local === true,
         crossPostToDevTo: serverCrossPostEnabled && crossPostToDevTo,
         crossPostToHashnode: serverCrossPostEnabled && crossPostToHashnode,

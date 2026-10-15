@@ -13,6 +13,7 @@ og_description: Learn how to publish Markdown articles with full metadata using 
 generate_toc: true
 comments_enabled: true
 status: PUBLISHED
+ai_disclosure: human_written
 cross_post:
   devto: false
   hashnode: false
