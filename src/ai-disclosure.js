@@ -73,3 +73,21 @@ export function parseAiDisclosure(frontmatter = {}) {
 export function toDevToAiDisclosureLevel(aiDisclosure) {
   return DISCLOSURE_LEVELS[aiDisclosure]?.devto || "not_disclosed";
 }
+
+export function validateAiDisclosureForStatus({
+  status,
+  aiDisclosure,
+  aiReviewConfirmed,
+}) {
+  if (status === "DRAFT") return;
+  if (!aiDisclosure) {
+    throw new Error(
+      "ai_disclosure is required when publishing or scheduling. Add human_written, ai_assisted, or ai_generated to the article frontmatter.",
+    );
+  }
+  if (aiDisclosure !== "human_written" && aiReviewConfirmed !== true) {
+    throw new Error(
+      "ai_review_confirmed: true is required when publishing AI-assisted or AI-generated content.",
+    );
+  }
+}

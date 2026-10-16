@@ -5,7 +5,7 @@ import { createRequire } from "node:module";
 import pc from "picocolors";
 import { loginCommand } from "../src/commands/login.js";
 import { whoamiCommand, logoutCommand } from "../src/commands/whoami.js";
-import { publishCommand } from "../src/commands/publish.js";
+import { publishWithValidation } from "../src/commands/publish-with-validation.js";
 import { importCommand } from "../src/commands/import.js";
 
 const program = new Command();
@@ -89,7 +89,7 @@ program
   )
   .option("-t, --token <token>", "ZyVOP API token or env ZYVOP_TOKEN")
   .option("--endpoint <url>", "Custom GraphQL endpoint")
-  .action(publishCommand);
+  .action(publishWithValidation);
 
 // 5. import
 program

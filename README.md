@@ -96,9 +96,11 @@ AI-generated articles, set `ai_review_confirmed: true` after a human has
 reviewed the complete article. `ai_disclosure_note` accepts up to 500
 characters of optional reader-facing context.
 
-The same declaration is sent through the REST and GraphQL publishing paths.
-With `--local --devto`, the CLI also maps it to DEV's native disclosure field.
-Drafts may omit the declaration while they are still being developed.
+The CLI validates these fields locally—including during `--dry-run`—and stops
+with an actionable error before making a network request. The declaration is
+then sent through the REST and GraphQL publishing paths. With `--local --devto`,
+the CLI also maps it to DEV's native disclosure field. Drafts may omit the
+declaration while they are still being developed.
 
 ### Keep provider credentials local
 

@@ -13,7 +13,7 @@ test("dry-run succeeds without contacting the configured endpoint", (t) => {
   const article = path.join(directory, "article.md");
   fs.writeFileSync(
     article,
-    "---\ntitle: Offline preview\ncover_image: ./cover.webp\n---\nBody",
+    "---\ntitle: Offline preview\ncover_image: ./cover.webp\nai_disclosure: human_written\n---\nBody",
     "utf8",
   );
 
@@ -39,6 +39,27 @@ test("dry-run succeeds without contacting the configured endpoint", (t) => {
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.match(result.stdout, /Local validation only/);
   assert.match(result.stdout, /https:\/\/example\.com\/blog\/cover\.webp/);
+});
+
+test("dry-run rejects a missing public AI disclosure before any network request", (t) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "zyvop-cli-disclosure-"));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const article = path.join(directory, "article.md");
+  fs.writeFileSync(article, "---\ntitle: Missing disclosure\n---\nBody", "utf8");
+
+  const result = spawnSync(
+    process.execPath,
+    ["bin/zyvop.js", "publish", article, "--dry-run", "--endpoint", "http://127.0.0.1:1"],
+    {
+      cwd: path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."),
+      env: { ...process.env, ZYVOP_TOKEN: "" },
+      encoding: "utf8",
+    },
+  );
+
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /ai_disclosure is required when publishing or scheduling/);
+  assert.doesNotMatch(result.stdout, /Preparing to publish/);
 });
 
 test("password-session publishing updates a post identified by zyvop_id", async (t) => {
