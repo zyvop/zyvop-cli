@@ -45,15 +45,12 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^12.1.0",
-    "gray-matter": "^4.0.3",
+    "js-yaml": "^5.4.3",
     "marked": "^18.0.10",
     "ora": "^8.1.0",
     "picocolors": "^1.1.1"
   },
   "overrides": {
-    "gray-matter": {
-      "js-yaml": "3.15.2"
-    },
     "js-yaml": {
       "argparse": "2.0.1"
     }

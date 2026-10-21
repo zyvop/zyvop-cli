@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import matter from "gray-matter";
+import { parseFrontmatter, stringifyFrontmatter } from "../src/frontmatter.js";
 import { publishCommand } from "../src/commands/publish.js";
 import {
   disableServerCrossPosting,
@@ -36,12 +36,12 @@ test("local credentials are resolved from the supplied environment without persi
 });
 
 test("local mode removes every server-side cross-post request", () => {
-  const input = matter.stringify("Body", {
+  const input = stringifyFrontmatter("Body", {
     title: "Local article",
     cross_post: { devto: true, hashnode: true, medium: true },
     crossPostToDevTo: true,
   });
-  const parsed = matter(disableServerCrossPosting(input));
+  const parsed = parseFrontmatter(disableServerCrossPosting(input));
 
   assert.deepEqual(parsed.data.cross_post, {
     devto: false,
@@ -132,7 +132,7 @@ Body`,
   const devToRequest = requests.find(
     ({ url }) => url === "https://dev.to/api/articles",
   );
-  const submittedMarkdown = matter(JSON.parse(zyvopRequest.init.body).content);
+  const submittedMarkdown = parseFrontmatter(JSON.parse(zyvopRequest.init.body).content);
   const devToArticle = JSON.parse(devToRequest.init.body).article;
 
   assert.equal(JSON.stringify(zyvopRequest).includes("provider-secret"), false);

@@ -1,7 +1,7 @@
 import path from "node:path";
-import matter from "gray-matter";
 import { marked } from "marked";
 import { parseAiDisclosure } from "./ai-disclosure.js";
+import { parseFrontmatter, stringifyFrontmatter } from "./frontmatter.js";
 
 const HTTP_PROTOCOLS = new Set(["http:", "https:"]);
 
@@ -111,7 +111,7 @@ function setIfDefined(target, key, value) {
 }
 
 export function buildPublishPayload({ filePath, rawFile, options = {} }) {
-  const parsed = matter(rawFile);
+  const parsed = parseFrontmatter(rawFile);
   const frontmatter = parsed.data || {};
   const originalContent = parsed.content || "";
 
@@ -353,7 +353,7 @@ export function buildPublishPayload({ filePath, rawFile, options = {} }) {
     content,
     htmlContent: marked.parse(content),
     normalizedFrontmatter,
-    normalizedMarkdown: matter.stringify(content, normalizedFrontmatter),
+    normalizedMarkdown: stringifyFrontmatter(content, normalizedFrontmatter),
     resolvedAssetCount,
   };
 }

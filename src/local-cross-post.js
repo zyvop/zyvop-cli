@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import matter from "gray-matter";
+import { parseFrontmatter, stringifyFrontmatter } from "./frontmatter.js";
 import { toDevToAiDisclosureLevel } from "./ai-disclosure.js";
 
 const ALL_PLATFORMS = ["devto", "hashnode", "medium", "bluesky", "wordpress"];
@@ -185,7 +185,7 @@ export function resolveAllLocalCredentials(crossPost, env = process.env) {
 }
 
 export function disableServerCrossPosting(normalizedMarkdown) {
-  const parsed = matter(normalizedMarkdown);
+  const parsed = parseFrontmatter(normalizedMarkdown);
   const data = { ...parsed.data };
   data.cross_post = Object.fromEntries(
     ALL_PLATFORMS.map((platform) => [platform, false]),
@@ -196,7 +196,7 @@ export function disableServerCrossPosting(normalizedMarkdown) {
   data.crossPostToBluesky = false;
   data.crossPostToWordpress = false;
   data.syndication_mode = "local";
-  return matter.stringify(parsed.content, data);
+  return stringifyFrontmatter(parsed.content, data);
 }
 
 export async function publishToDevTo(context, credentials, fetchImpl = fetch) {

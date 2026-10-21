@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import matter from "gray-matter";
+import { parseFrontmatter } from "../src/frontmatter.js";
 import { buildPublishPayload } from "../src/publish-payload.js";
 
 const ARTICLE = `---
@@ -24,7 +24,7 @@ test("preserves unknown frontmatter and resolves all supported relative assets",
     rawFile: ARTICLE,
     options: { baseUrl: "https://site.example/blog/posts/" },
   });
-  const submitted = matter(payload.normalizedMarkdown);
+  const submitted = parseFrontmatter(payload.normalizedMarkdown);
 
   assert.equal(submitted.data.layout, "BlogPostLayout");
   assert.equal(submitted.data.readingTime, "4 min");
@@ -61,7 +61,7 @@ test("applies CLI overrides to the normalized developer-token Markdown", () => {
       tags: "security, cli",
     },
   });
-  const submitted = matter(payload.normalizedMarkdown);
+  const submitted = parseFrontmatter(payload.normalizedMarkdown);
 
   assert.equal(
     submitted.data.cover_image,
@@ -81,7 +81,7 @@ test("does not force the default published status into frontmatter", () => {
 
   assert.equal(payload.status, "PUBLISHED");
   assert.equal(payload.statusExplicit, false);
-  assert.equal(matter(payload.normalizedMarkdown).data.status, undefined);
+  assert.equal(parseFrontmatter(payload.normalizedMarkdown).data.status, undefined);
 });
 
 test("normalizes AI disclosure metadata for REST, GraphQL, and DEV", () => {
@@ -95,7 +95,7 @@ aiReviewConfirmed: true
 ---
 Body`,
   });
-  const submitted = matter(payload.normalizedMarkdown);
+  const submitted = parseFrontmatter(payload.normalizedMarkdown);
 
   assert.equal(payload.aiDisclosure, "ai_assisted");
   assert.equal(payload.aiDisclosureLevel, "AI_ASSISTED");
