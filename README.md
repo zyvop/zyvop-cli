@@ -174,6 +174,7 @@ ZyVOP is built for Git-backed and headless blogging workflows.
 - **Relative Images:** Root-relative (`/blog/cover.webp`) and file-relative (`./cover.webp` or `../cover.webp`) cover and body images are resolved with `base_url`, `--base-url`, or the origin of `canonical_url`. Only HTTP(S) base URLs are accepted.
 - **Consistent Overrides:** Developer-token publishing sends the same normalized values shown by `--dry-run`, including cover, status, tags, and cross-post flags.
 - **Update vs. Create:** With a developer token (`zv_...`), the API reports whether it created or updated the post. Use a stable `canonical_url`, `zyvop_id`, `id`, or `slug` in frontmatter for repeatable Git publishing. Password-session GraphQL publishing updates only when `zyvop_id`/`id` or `slug` identifies an owned post; otherwise it creates a post.
+- **Generated Slugs:** Frontmatter `slug` looks up an existing owned post; it does not set the URL slug for a new post. New posts receive a title-based slug with a random five-character suffix, even without a collision (for example, `testing-zyvop-cli-qk6i1`). For later updates, use the returned post ID as `zyvop_id` or `id`, or use the full generated slug. A stable `canonical_url` also supports repeat publishing with a developer token.
 
 Dry-run is intentionally local and read-only:
 

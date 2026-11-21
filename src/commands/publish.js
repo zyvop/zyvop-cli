@@ -5,53 +5,18 @@ import pc from "picocolors";
 import {
   createPostApi,
   getOwnedPostApi,
-  getMyIntegrationsApi,
   publishArticleRestApi,
   updatePostApi,
 } from "../api.js";
 import { resolveAuthToken, resolveEndpoint, resolveWebUrl } from "../config.js";
+import { renderPublishPreview } from "./publish/preview.js";
+import { publishSuccessMessage, renderZyvopResult } from "./publish/result.js";
+import { renderSyndication } from "./publish/syndication.js";
 import { buildPublishPayload } from "../publish-payload.js";
 import {
-  crossPostLocally,
   disableServerCrossPosting,
-  requestedLocalPlatforms,
   resolveAllLocalCredentials,
 } from "../local-cross-post.js";
-
-const PLATFORM_LABELS = {
-  devto: "dev.to",
-  hashnode: "Hashnode",
-  medium: "Medium",
-  bluesky: "Bluesky",
-  wordpress: "WordPress",
-};
-
-function renderZyvopResult(post, action, liveUrl) {
-  console.log(
-    pc.bold("────────────────────────────────────────────────────────────"),
-  );
-  console.log(`  🌐 ${pc.bold("ZyVOP Live URL:")}  ${pc.cyan(liveUrl)}`);
-  if (post.id) console.log(`  🆔 ${pc.bold("ZyVOP Post ID:")}   ${post.id}`);
-  console.log(
-    `  ⚡ ${pc.bold("Action:")}          ${
-      action === "updated"
-        ? pc.yellow("Updated existing article")
-        : pc.green("Created new article")
-    }`,
-  );
-}
-
-function redactLocalError(message, credentials) {
-  let redacted = String(message || "Unknown provider error");
-  for (const providerCredentials of Object.values(credentials)) {
-    for (const value of Object.values(providerCredentials || {})) {
-      if (typeof value === "string" && value.length >= 4) {
-        redacted = redacted.split(value).join("[REDACTED]");
-      }
-    }
-  }
-  return redacted;
-}
 
 export async function publishCommand(filePath, options) {
   const resolvedPath = path.resolve(process.cwd(), filePath);
@@ -90,11 +55,9 @@ export async function publishCommand(filePath, options) {
     aiDisclosureLevel,
     aiDisclosureNote,
     aiReviewConfirmed,
-    aiDisclosureLabel,
     statusExplicit,
     postId,
     slug,
-    resolvedAssetCount,
   } = payload;
   const crossPostToDevTo = crossPost.devto;
   const crossPostToHashnode = crossPost.hashnode;
@@ -104,83 +67,7 @@ export async function publishCommand(filePath, options) {
 
   // Dry-run mode
   if (options.dryRun) {
-    console.log(
-      pc.bold(
-        pc.yellow(`\n🔍 [DRY RUN] Previewing publish payload for: "${title}"`),
-      ),
-    );
-    console.log(
-      pc.dim(
-        "Local validation only; no network requests or writes were performed.",
-      ),
-    );
-    console.log(
-      pc.bold("────────────────────────────────────────────────────────────"),
-    );
-    console.log(`  📄 ${pc.bold("File:")}            ${pc.cyan(resolvedPath)}`);
-    console.log(`  🏷️  ${pc.bold("Title:")}           ${title}`);
-    if (subtitle)
-      console.log(`  📝 ${pc.bold("Subtitle:")}        ${subtitle}`);
-    if (excerpt) console.log(`  📜 ${pc.bold("Excerpt:")}         ${excerpt}`);
-    console.log(`  🚦 ${pc.bold("Status:")}          ${status}`);
-    console.log(`  🤖 ${pc.bold("AI disclosure:")}   ${aiDisclosureLabel}`);
-    if (canonicalUrl)
-      console.log(
-        `  🔗 ${pc.bold("Canonical URL:")}   ${pc.dim(canonicalUrl)}`,
-      );
-    if (coverImage)
-      console.log(`  🖼️  ${pc.bold("Cover Image:")}     ${pc.dim(coverImage)}`);
-    if (tagNames.length > 0)
-      console.log(
-        `  🏷️  ${pc.bold("Tags:")}            ${tagNames.join(", ")}`,
-      );
-    if (categorySlug)
-      console.log(`  📁 ${pc.bold("Category:")}        ${categorySlug}`);
-    if (seriesId)
-      console.log(`  📚 ${pc.bold("Series ID:")}       ${seriesId}`);
-    if (postId) console.log(`  🆔 ${pc.bold("ZyVOP ID:")}        ${postId}`);
-    else if (slug) console.log(`  🔑 ${pc.bold("ZyVOP Slug:")}      ${slug}`);
-    console.log(`  🧩 ${pc.bold("Assets resolved:")} ${resolvedAssetCount}`);
-    console.log(
-      `  ⚡ ${pc.bold("Publish action:")}  ${pc.yellow(
-        postId || slug
-          ? "Update when this owned post exists; otherwise create"
-          : canonicalUrl
-            ? "Create or update by canonical URL with a developer token"
-            : "Determined by the server during publish",
-      )}`,
-    );
-    console.log(
-      pc.bold("────────────────────────────────────────────────────────────"),
-    );
-    console.log(pc.bold("  📡 Syndication Targets:"));
-    if (options.local) {
-      console.log(
-        pc.dim(
-          "     Mode                 Local (provider credentials stay on this machine)",
-        ),
-      );
-    }
-    const targets = [
-      { name: "ZyVOP (Primary)", enabled: true },
-      { name: "dev.to", enabled: crossPostToDevTo },
-      { name: "Hashnode", enabled: crossPostToHashnode },
-      { name: "Medium", enabled: crossPostToMedium },
-      { name: "Bluesky", enabled: crossPostToBluesky },
-      { name: "WordPress", enabled: crossPostToWordpress },
-    ];
-    targets.forEach((t) => {
-      const state = t.enabled ? pc.green("✓ Requested") : pc.dim("✗ Skipped");
-      console.log(`     ${t.name.padEnd(20)} ${state}`);
-    });
-    console.log(
-      pc.bold("────────────────────────────────────────────────────────────\n"),
-    );
-    console.log(
-      pc.green(
-        "✨ Local payload validation completed. The server will decide create/update state.\n",
-      ),
-    );
+    renderPublishPreview(payload, options, resolvedPath);
     return;
   }
 
@@ -236,9 +123,11 @@ export async function publishCommand(filePath, options) {
   console.log();
 
   const spinner = ora(
-    options.local
-      ? "Publishing article to ZyVOP..."
-      : "Broadcasting article to ZyVOP and connected targets...",
+    status === "DRAFT"
+      ? "Saving draft to ZyVOP..."
+      : options.local
+        ? "Publishing article to ZyVOP..."
+        : "Broadcasting article to ZyVOP and connected targets...",
   ).start();
   let post;
   let action;
@@ -297,152 +186,23 @@ export async function publishCommand(filePath, options) {
       liveUrl = resolveWebUrl(post.slug, endpoint);
     }
 
+    const savedStatus = post.status || status;
     spinner.succeed(
-      pc.green(
-        pc.bold(
-          action === "updated"
-            ? "Article updated successfully! 🔄\n"
-            : "Article published successfully! 🎉\n",
-        ),
-      ),
+      pc.green(pc.bold(publishSuccessMessage(savedStatus, action))),
     );
 
-    renderZyvopResult(post, action, liveUrl);
+    renderZyvopResult(post, action, liveUrl, endpoint, savedStatus);
 
-    if (options.local) {
-      const localPlatforms = requestedLocalPlatforms(crossPost);
-      if (status !== "PUBLISHED") {
-        console.log(
-          `  📡 ${pc.bold("Local syndication:")} ${pc.dim(`Skipped for ${status.toLowerCase()} article`)}`,
-        );
-        console.log(
-          pc.bold(
-            "────────────────────────────────────────────────────────────\n",
-          ),
-        );
-        return;
-      }
-      if (localPlatforms.length === 0) {
-        console.log(
-          `  📡 ${pc.bold("Local syndication:")} ${pc.dim("No targets selected")}`,
-        );
-        console.log(
-          pc.bold(
-            "────────────────────────────────────────────────────────────\n",
-          ),
-        );
-        return;
-      }
-
-      const localSpinner = ora(
-        "Publishing directly to local-credential targets...",
-      ).start();
-      const results = await crossPostLocally({
-        payload,
-        zyvopPost: post,
-        liveUrl,
-        credentials: localCredentials,
-      });
-      const failures = results.filter((result) => !result.success);
-      if (failures.length > 0) {
-        localSpinner.warn(
-          pc.yellow("Local syndication completed with errors."),
-        );
-      } else {
-        localSpinner.succeed(pc.green("Local syndication completed."));
-      }
-      for (const result of results) {
-        const label = PLATFORM_LABELS[result.platform] || result.platform;
-        if (result.success) {
-          console.log(
-            `  ${label.padEnd(20)} ${pc.green(result.action || "Published")}${
-              result.url ? pc.dim(` (${result.url})`) : ""
-            }`,
-          );
-        } else {
-          console.log(
-            `  ${label.padEnd(20)} ${pc.red("Failed")} ${pc.dim(
-              `(${redactLocalError(result.error, localCredentials)})`,
-            )}`,
-          );
-        }
-      }
-      console.log(
-        pc.bold(
-          "────────────────────────────────────────────────────────────\n",
-        ),
-      );
-      if (failures.length > 0) process.exitCode = 1;
-      return;
-    }
-
-    // Check integrations for actionable terminal feedback
-    let integrations = null;
-    try {
-      integrations = await getMyIntegrationsApi(token, endpoint);
-    } catch {}
-
-    // Render Clean Success Card
-    const errors = post.crossPostErrors || {};
-
-    const renderTarget = (label, enabled, url, errKey, hasKey) => {
-      if (!enabled) return;
-      const errorMsg = errors[errKey];
-      if (url) {
-        console.log(
-          `  ${label.padEnd(20)} ${pc.green("Live")} ${pc.dim(`(${url})`)}`,
-        );
-      } else if (errorMsg) {
-        console.log(
-          `  ${label.padEnd(20)} ${pc.yellow("Skipped")} ${pc.dim(`(${errorMsg})`)}`,
-        );
-      } else if (hasKey === false) {
-        console.log(
-          `  ${label.padEnd(20)} ${pc.yellow("Warning")} ${pc.dim("(Missing API key in Settings > Integrations)")}`,
-        );
-      } else {
-        console.log(`  ${label.padEnd(20)} ${pc.green("Queued & Synced")}`);
-      }
-    };
-
-    renderTarget(
-      `⚡ ${pc.bold("dev.to:")}`,
-      crossPostToDevTo,
-      post.devToArticleUrl,
-      "dev.to",
-      integrations?.hasDevToApiKey,
-    );
-    renderTarget(
-      `🚀 ${pc.bold("Hashnode:")}`,
-      crossPostToHashnode,
-      post.hashnodeArticleUrl,
-      "hashnode",
-      integrations?.hasHashnodeApiKey,
-    );
-    renderTarget(
-      `🦋 ${pc.bold("Bluesky:")}`,
-      crossPostToBluesky,
-      post.blueskyPostUrl,
-      "bluesky",
-      integrations?.hasBlueskyIntegration,
-    );
-    renderTarget(
-      `✍️  ${pc.bold("Medium:")}`,
-      crossPostToMedium,
-      post.mediumArticleUrl,
-      "medium",
-      integrations?.hasMediumApiKey,
-    );
-    renderTarget(
-      `📝 ${pc.bold("WordPress:")}`,
-      crossPostToWordpress,
-      post.wordpressArticleUrl,
-      "wordpress",
-      integrations?.hasWordpressIntegration,
-    );
-    console.log(
-      pc.bold("────────────────────────────────────────────────────────────\n"),
-    );
+    await renderSyndication({
+      options,
+      payload,
+      post,
+      liveUrl,
+      localCredentials,
+      token,
+      endpoint,
+      status: savedStatus,
+    });
   } catch (err) {
     spinner.fail(pc.red(`Failed to publish: ${err.message}\n`));
     process.exitCode = 1;

@@ -5,9 +5,9 @@ import pc from "picocolors";
 import { loginApi, getMeApi } from "../api.js";
 import {
   saveStoredConfig,
-  resolveEndpoint,
   resolveWebUrl,
   DEFAULT_ENDPOINT,
+  CONFIG_FILE,
 } from "../config.js";
 
 export async function loginCommand(options) {
@@ -26,6 +26,7 @@ export async function loginCommand(options) {
       console.log(
         pc.green(`✔ Developer Token authenticated and saved successfully!`),
       );
+      console.log(pc.dim(`Saved credentials to ${CONFIG_FILE}`));
       console.log(pc.dim(`Endpoint: ${endpoint}\n`));
       return;
     }
@@ -41,6 +42,7 @@ export async function loginCommand(options) {
       spinner.succeed(
         pc.green(`Authenticated as ${pc.bold(user.username || user.email)}!`),
       );
+      console.log(pc.dim(`Saved credentials to ${CONFIG_FILE}`));
       console.log(pc.dim(`Endpoint: ${endpoint}\n`));
       return;
     } catch (err) {
@@ -87,7 +89,7 @@ export async function loginCommand(options) {
         user: user || { username: "Developer", isDeveloperToken: true },
       });
       spinner.succeed(pc.green(`Developer Token saved successfully!`));
-      console.log(pc.dim(`Saved credentials to ~/.zyvop/config.json\n`));
+      console.log(pc.dim(`Saved credentials to ${CONFIG_FILE}\n`));
       return;
     }
 
@@ -149,7 +151,7 @@ export async function loginCommand(options) {
         `Welcome back, ${pc.bold(user?.username || user?.name || email)}!`,
       ),
     );
-    console.log(pc.dim(`Saved credentials to ~/.zyvop/config.json\n`));
+    console.log(pc.dim(`Saved credentials to ${CONFIG_FILE}\n`));
   } catch (err) {
     console.log(pc.red(`\nLogin failed: ${err.message}\n`));
     process.exit(1);

@@ -3,7 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 
 const CONFIG_DIR = path.join(os.homedir(), '.zyvop');
-const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
+export const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
 
 export const DEFAULT_ENDPOINT = process.env.ZYVOP_ENDPOINT || 'https://zyvop.com/graphql';
 export const DEFAULT_WEB_URL = process.env.ZYVOP_WEB_URL || 'https://zyvop.com';
