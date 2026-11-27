@@ -3,108 +3,16 @@ import { marked } from "marked";
 import { parseAiDisclosure } from "./ai-disclosure.js";
 import { parseFrontmatter, stringifyFrontmatter } from "./frontmatter.js";
 
-const HTTP_PROTOCOLS = new Set(["http:", "https:"]);
-
-function optionalString(value, fieldName) {
-  if (value === undefined || value === null || value === "") return undefined;
-  if (typeof value !== "string") {
-    throw new Error(`${fieldName} must be a string.`);
-  }
-  const trimmed = value.trim();
-  return trimmed || undefined;
-}
-
-function absoluteHttpUrl(value, fieldName) {
-  const text = optionalString(value, fieldName);
-  if (!text) return undefined;
-
-  let parsed;
-  try {
-    parsed = new URL(text);
-  } catch {
-    throw new Error(
-      `${fieldName} must be an absolute http:// or https:// URL.`,
-    );
-  }
-
-  if (!HTTP_PROTOCOLS.has(parsed.protocol)) {
-    throw new Error(`${fieldName} must use http:// or https://.`);
-  }
-
-  return parsed.toString();
-}
-
-function resolveAssetUrl(value, baseUrl, fieldName) {
-  const text = optionalString(value, fieldName);
-  if (!text) return undefined;
-
-  let absolute;
-  try {
-    absolute = new URL(text);
-  } catch {}
-
-  if (absolute) {
-    if (!HTTP_PROTOCOLS.has(absolute.protocol)) {
-      throw new Error(`${fieldName} must use http:// or https://.`);
-    }
-    return absolute.toString();
-  }
-
-  if (!baseUrl) {
-    throw new Error(
-      `${fieldName} is relative. Add --base-url, base_url, or canonical_url to resolve it.`,
-    );
-  }
-
-  return new URL(
-    text,
-    baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`,
-  ).toString();
-}
-
-function resolveMarkdownAssets(content, baseUrl) {
-  if (!baseUrl) return { content, resolvedAssetCount: 0 };
-
-  let resolvedAssetCount = 0;
-  const resolveRelative = (candidate) => {
-    const value = candidate.trim();
-    if (!value || value.startsWith("#") || value.startsWith("data:")) {
-      return candidate;
-    }
-
-    try {
-      const absolute = new URL(value);
-      if (!HTTP_PROTOCOLS.has(absolute.protocol)) {
-        throw new Error(`Image URL must use http:// or https://: ${value}`);
-      }
-      return candidate;
-    } catch {
-      if (/^[a-z][a-z0-9+.-]*:/i.test(value)) {
-        throw new Error(`Image URL must use http:// or https://: ${value}`);
-      }
-      resolvedAssetCount += 1;
-      return new URL(
-        value,
-        baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`,
-      ).toString();
-    }
-  };
-
-  let resolved = content.replace(
-    /(!\[[^\]]*\]\(\s*)(<?)([^)\s>]+)(>?)([^)]*\))/g,
-    (match, prefix, openingBracket, url, closingBracket, suffix) => {
-      const nextUrl = resolveRelative(url);
-      return `${prefix}${openingBracket}${nextUrl}${closingBracket}${suffix}`;
-    },
-  );
-
-  resolved = resolved.replace(
-    /(<img\b[^>]*\bsrc=["'])([^"']+)(["'][^>]*>)/gi,
-    (match, prefix, url, suffix) => `${prefix}${resolveRelative(url)}${suffix}`,
-  );
-
-  return { content: resolved, resolvedAssetCount };
-}
+import {
+  optionalString,
+  absoluteHttpUrl,
+  resolveAssetUrl,
+  resolveMarkdownAssets,
+} from "./publishing/assets.js";
+import {
+  normalizeDestinations,
+  normalizeLinkedinCaptions,
+} from "./publishing/destinations.js";
 
 function setIfDefined(target, key, value) {
   if (value !== undefined) target[key] = value;
@@ -197,44 +105,7 @@ export function buildPublishPayload({ filePath, rawFile, options = {} }) {
       ? "DRAFT"
       : frontmatterStatus || "PUBLISHED";
 
-  const crossPostFm =
-    frontmatter.cross_post && typeof frontmatter.cross_post === "object"
-      ? frontmatter.cross_post
-      : frontmatter.crosspost && typeof frontmatter.crosspost === "object"
-        ? frontmatter.crosspost
-        : {};
-  const crossPost = {
-    devto:
-      options.devto ??
-      crossPostFm.devto ??
-      frontmatter.crossPostToDevTo ??
-      true,
-    hashnode:
-      options.hashnode ??
-      crossPostFm.hashnode ??
-      frontmatter.crossPostToHashnode ??
-      true,
-    medium:
-      options.medium ??
-      crossPostFm.medium ??
-      frontmatter.crossPostToMedium ??
-      false,
-    bluesky:
-      options.bluesky ??
-      crossPostFm.bluesky ??
-      frontmatter.crossPostToBluesky ??
-      false,
-    wordpress:
-      options.wordpress ??
-      crossPostFm.wordpress ??
-      frontmatter.crossPostToWordpress ??
-      false,
-  };
-  for (const [platform, enabled] of Object.entries(crossPost)) {
-    if (typeof enabled !== "boolean") {
-      throw new Error(`cross_post.${platform} must be true or false.`);
-    }
-  }
+  const crossPost = normalizeDestinations(frontmatter, options);
 
   const categorySlug =
     optionalString(options.category, "category") ||
@@ -288,7 +159,11 @@ export function buildPublishPayload({ filePath, rawFile, options = {} }) {
 
   // Preserve unknown keys for dual-use repositories while replacing known ZyVOP
   // fields with the exact normalized values shown by dry-run.
-  const normalizedFrontmatter = { ...frontmatter, title };
+  const normalizedFrontmatter = {
+    ...frontmatter,
+    title,
+    ...normalizeLinkedinCaptions(frontmatter),
+  };
   setIfDefined(normalizedFrontmatter, "subtitle", subtitle);
   setIfDefined(normalizedFrontmatter, "excerpt", excerpt);
   setIfDefined(normalizedFrontmatter, "canonical_url", canonicalUrl);

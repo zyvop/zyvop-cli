@@ -1,3 +1,7 @@
+import {
+  linkedinPublishFields,
+  assertLinkedinPublishingMode,
+} from "../publishing/destinations.js";
 import fs from "node:fs";
 import path from "node:path";
 import ora from "ora";
@@ -59,6 +63,7 @@ export async function publishCommand(filePath, options) {
     postId,
     slug,
   } = payload;
+  assertLinkedinPublishingMode(crossPost, options.local === true);
   const crossPostToDevTo = crossPost.devto;
   const crossPostToHashnode = crossPost.hashnode;
   const crossPostToMedium = crossPost.medium;
@@ -111,6 +116,12 @@ export async function publishCommand(filePath, options) {
   if (crossPostToMedium) syndicationTargets.push("Medium");
   if (crossPostToBluesky) syndicationTargets.push("Bluesky");
   if (crossPostToWordpress) syndicationTargets.push("WordPress");
+  if (crossPost.linkedin)
+    syndicationTargets.push("LinkedIn (saved destination)");
+  if (crossPost["linkedin-profile"])
+    syndicationTargets.push("LinkedIn personal profile");
+  if (crossPost["linkedin-page"])
+    syndicationTargets.push("LinkedIn company Page (Pro)");
 
   if (syndicationTargets.length > 0) {
     const mode = options.local ? "local/direct" : "ZyVOP server";
@@ -163,6 +174,7 @@ export async function publishCommand(filePath, options) {
         aiDisclosureNote,
         aiReviewConfirmed,
         suppressAutoCrossPost: options.local === true,
+        ...linkedinPublishFields(payload, serverCrossPostEnabled),
         crossPostToDevTo: serverCrossPostEnabled && crossPostToDevTo,
         crossPostToHashnode: serverCrossPostEnabled && crossPostToHashnode,
         crossPostToMedium: serverCrossPostEnabled && crossPostToMedium,

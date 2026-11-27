@@ -1,7 +1,7 @@
 {
   "name": "zyvop",
   "version": "1.1.5",
-  "description": "Official CLI for ZyVOP - Write once in Markdown and cross-post to Dev.to, Hashnode, Medium & Bluesky.",
+  "description": "Official CLI for ZyVOP - Publish Markdown and distribute articles to connected platforms, including LinkedIn profiles and Pro company Pages.",
   "type": "module",
   "bin": {
     "zyvop": "bin/zyvop.js"
@@ -39,7 +39,8 @@
     "medium",
     "bluesky",
     "syndication",
-    "github-actions"
+    "github-actions",
+    "linkedin"
   ],
   "author": "ZyVOP Team <hello@zyvop.com>",
   "license": "MIT",

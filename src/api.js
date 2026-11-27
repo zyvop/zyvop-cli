@@ -119,6 +119,9 @@ export async function getMyIntegrationsApi(token, endpoint) {
         hasMediumApiKey
         hasWordpressIntegration
         hasBlueskyIntegration
+        hasLinkedinIntegration
+        hasLinkedinProfileIntegration
+        hasLinkedinPageIntegration
       }
     }
   `;
@@ -156,6 +159,9 @@ export async function createPostApi(input, token, endpoint) {
         mediumArticleUrl
         blueskyPostUrl
         wordpressArticleUrl
+        linkedinPostUrl
+        linkedinProfilePostUrl
+        linkedinPagePostUrl
       }
     }
   `;
@@ -180,6 +186,9 @@ const OWNED_POST_FIELDS = `
   mediumArticleUrl
   blueskyPostUrl
   wordpressArticleUrl
+  linkedinPostUrl
+  linkedinProfilePostUrl
+  linkedinPagePostUrl
   crossPostErrors
 `;
 

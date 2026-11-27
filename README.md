@@ -102,6 +102,23 @@ then sent through the REST and GraphQL publishing paths. With `--local --devto`,
 the CLI also maps it to DEV's native disclosure field. Drafts may omit the
 declaration while they are still being developed.
 
+### LinkedIn personal profiles and company Pages
+
+Connect your LinkedIn accounts in ZyVOP, then publish through the CLI. Personal profiles are Free;
+company Pages require Pro and a Page you manage. Select either or both with separate captions:
+
+```yaml
+cross_post:
+  linkedin-profile: true
+  linkedin-page: true
+linkedinProfileCaption: "Your personal caption goes here."
+linkedinPageCaption: "The practical takeaways for our Page’s audience."
+```
+
+The article link and cover are added automatically. Each caption is optional and limited to
+2,500 characters. The legacy `linkedin` flag retains the account’s configured single destination.
+LinkedIn publishing is server-managed; these destinations are unavailable with `--local`.
+
 ### Keep provider credentials local
 
 Use `--local` to publish to Dev.to, Hashnode, Medium, WordPress, and Bluesky

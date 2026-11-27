@@ -115,7 +115,15 @@ export async function renderSyndication({
   // Render Clean Success Card
   const errors = post.crossPostErrors || {};
 
-  const renderTarget = (label, enabled, url, errKey, hasKey) => {
+  const renderTarget = (
+    label,
+    enabled,
+    url,
+    errKey,
+    hasKey,
+    pending = "Queued & Synced",
+    missing = "Missing API key in Settings > Integrations",
+  ) => {
     if (!enabled) return;
     const errorMsg = errors[errKey];
     if (url) {
@@ -128,10 +136,10 @@ export async function renderSyndication({
       );
     } else if (hasKey === false) {
       console.log(
-        `  ${label.padEnd(20)} ${pc.yellow("Warning")} ${pc.dim("(Missing API key in Settings > Integrations)")}`,
+        `  ${label.padEnd(20)} ${pc.yellow("Warning")} ${pc.dim(`(${missing})`)}`,
       );
     } else {
-      console.log(`  ${label.padEnd(20)} ${pc.green("Queued & Synced")}`);
+      console.log(`  ${label.padEnd(20)} ${pc.green(pending)}`);
     }
   };
 
@@ -170,6 +178,36 @@ export async function renderSyndication({
     "wordpress",
     integrations?.hasWordpressIntegration,
   );
+  for (const [key, label, url, connected] of [
+    [
+      "linkedin",
+      "LinkedIn (saved):",
+      post.linkedinPostUrl,
+      integrations?.hasLinkedinIntegration,
+    ],
+    [
+      "linkedin-profile",
+      "LinkedIn profile:",
+      post.linkedinProfilePostUrl,
+      integrations?.hasLinkedinProfileIntegration,
+    ],
+    [
+      "linkedin-page",
+      "LinkedIn company:",
+      post.linkedinPagePostUrl,
+      integrations?.hasLinkedinPageIntegration,
+    ],
+  ]) {
+    renderTarget(
+      label,
+      crossPost[key],
+      url,
+      key,
+      connected,
+      "Queued",
+      "Connect this LinkedIn destination in Settings > Integrations (company Pages require Pro)",
+    );
+  }
   console.log(
     pc.bold("────────────────────────────────────────────────────────────\n"),
   );
